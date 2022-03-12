@@ -3,7 +3,7 @@ const { User } = require('../models/user.model');
 const { Comment } = require('../models/comment.model');
 //utils
 const { filterObj } = require('../util/filterObj');
-const { catchAsync } = require('../util/catchAsync');
+const { catchAsync } = require('../util/catchAsyn');
 const { AppError } = require('../util/appError');
 
 exports.getAllComments = catchAsync(async (req, res, next) => {

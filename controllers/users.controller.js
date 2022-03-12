@@ -1,13 +1,17 @@
+const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
+const dotenv = require('dotenv')
 // Models
 const { User } = require('../models/user.model');
 const { Post } = require('../models/post.model');
 const { Comment } = require('../models/comment.model');
 
 // Utils
-const { filterObj } = require('../util/filterObj');
-const { catchAsync } = require('../util/catchAsync');
+// const { filterObj } = require('../util/filterObj');
+const { catchAsync } = require('../util/catchAsyn');
 const { AppError } = require('../util/appError');
 
+dotenv.config({path: '../config.env'})
 // Get all users
 exports.getAllUsers = catchAsync(async (req, res, next) => {
   // Nested includes
@@ -60,14 +64,44 @@ exports.createNewUser = catchAsync(async (req, res) => {
   }
 
   // MUST ENCRYPT PASSWORD
+  //regla de oro, jamas almacenar el password de forma plana, 
+const salt = await bcrypt.genSalt(12)
+const hashedPassword = await bcrypt.hash(password, salt)
+
   const newUser = await User.create({
     name,
     email,
-    password
+    password: hashedPassword
   });
+
+  newUser.password = undefined;
 
   res.status(201).json({
     status: 'success',
     data: { newUser }
   });
 });
+
+exports.loginUser = catchAsync(async (req, res, next) => {
+
+  const { email, password} = req.body
+
+  const user = await User.findOne({ where: {email, status: 'active'}})
+
+  if(!user || !(await  bcrypt.compare(password, user.password))  ){
+    return next(new AppError(404, 'Credenctail are invalid'))
+  }
+// generacion de credenciales de validacion  (token)
+//token 
+
+const token = await jwt.sign({id: user.id}, process.env.JWT_SECRET, {
+  expiresIn: process.env.JWT_EXPIRES_IN
+})
+  console.log(token);
+  res.status(200).json({
+    status: 'success',
+    data: {
+      token
+    }
+  })
+})

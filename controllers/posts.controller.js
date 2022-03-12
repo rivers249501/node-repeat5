@@ -3,7 +3,7 @@ const { Post } = require('../models/post.model');
 
 // Utils
 const { filterObj } = require('../util/filterObj');
-const { catchAsync } = require('../util/catchAsync');
+const { catchAsync } = require('../util/catchAsyn');
 const { AppError } = require('../util/appError');
 
 // Get all posts
